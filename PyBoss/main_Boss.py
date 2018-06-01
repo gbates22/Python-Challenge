@@ -2,10 +2,6 @@ import os
 import csv
 import string
 
-
-file_to_load = 'raw_data\employee_data2.csv'
-file_to_output = 'Analysis\Boss_answer.csv'
-
 us_state_abbrev = {
     'Alabama': 'AL',
     'Alaska': 'AK',
@@ -59,7 +55,6 @@ us_state_abbrev = {
     'Wyoming': 'WY',
 }
 
-csvpath = os.path.join('raw_data\employee_data2.csv')
 
 id = []
 firstname = []
@@ -68,26 +63,56 @@ dob = []
 ssn = []
 state = []
 
-#with open(file_to_load) as data:
-    #reader = csv.DictReader(data)
-
-with open(csvpath, newline='') as csvfile:
-    csvreader = csv.reader(csvfile, delimiter=',')
-    #csv_header = next(csvreader)
-    print(csvreader) 
+csvpath = os.path.join('raw_data\employee_data2.csv')
+with open(csvpath, newline="") as csvfile:
+    csvreader = csv.DictReader(csvfile, delimiter=",")
    
-    
+    # for loop to interate through each row in csv
     for row in csvreader:
         
-        id = (row[0])
+        # pull Emp ID column and store in new list
+        id = id + [row["Emp ID"]]
         
-        split_name = row[1].split(" ")
+        # reformat Name by splitting into first and last
+        split_name = row["Name"].split(" ")
         firstname1 = split_name[0]
-        lastname1 = split_name[-1]   
+        lastname1 = split_name[1]   
         
+        # store reformatted name in new list
         firstname = firstname + [firstname1]
         lastname = lastname + [lastname1]
         
-      
-       
+        
+        # reformat date
+        r_dob = row["DOB"].split('-')
+        r_dob = f'{r_dob[2]}/{r_dob[1]}/{r_dob[0]}'
+
+        # restore reformatted dob in new list
+        dob = dob + [r_dob]
+        
+        # add ****** to SSN by splitting, reassigning list elements and recombining
+        split_ssn = list(row["SSN"])
+        split_ssn[0:3] = ("*", "*", "*")
+        split_ssn[4:6] = ("*", "*")
+        combined_ssn = "".join(split_ssn)
+
+        # store reformatted dob in new list
+        ssn = ssn + [combined_ssn]
+
+        # Use provided dictionary to retrieve state abbreviation
+        state_abbrev = us_state_abbrev[row["State"]]
+
+        # store state abbreviation in new list
+        state = state + [state_abbrev]
+
+
+     # zip new/reformatted lists together
+r_csv = zip(id, firstname, lastname, dob, ssn, state)
+
+answer_csv = os.path.join('Analysis\Boss_answer.csv')
+
+with open(answer_csv, "w", newline="") as csvfile:
+    writer = csv.writer(csvfile) 
+    writer.writerow(["EmpID", "First Name", "Last Name", "DOB", "SSN", "State"])
+    writer.writerows(r_csv)
 
